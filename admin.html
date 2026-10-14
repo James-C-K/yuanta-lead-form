@@ -27,6 +27,9 @@
     position:sticky;top:0;z-index:30;
     padding-top:env(safe-area-inset-top, 0px);
     background:var(--accent);
+    transform:translateZ(0);
+    -webkit-transform:translateZ(0);
+    will-change:transform;
   }
   .topbar{
     background:linear-gradient(165deg, var(--accent-2), var(--accent));
@@ -302,6 +305,11 @@
       d.addEventListener('toggle', function () {
         var n = Number(d.dataset.n);
         if (d.open) openSet.add(n); else openSet.delete(n);
+        if (d.open) {
+          // Force a layout pass so freshly-revealed date inputs are
+          // "warmed up" before the user's first tap (iOS picker glitch).
+          void d.offsetHeight;
+        }
       });
     });
   }
