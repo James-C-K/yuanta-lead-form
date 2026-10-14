@@ -164,23 +164,53 @@ export default async function handler(req, res) {
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.status(200).send(`<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>已送出</title>
 <style>
-  :root{--accent:#0b57a4;--accent-2:#2f8fe0;--ink:#161a23;--ink-2:#555d6e}
+  :root{--accent:#0b57a4;--accent-2:#2f8fe0;--n-accent:#6d3df0;--n-accent-2:#9b6bfb;--ink:#161a23;--ink-2:#555d6e;--line:#e4e7ee}
   *{box-sizing:border-box}
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;background:radial-gradient(1200px 500px at 50% -10%, #e7f1fc 0%, #eef1f7 55%);display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;color:var(--ink)}
-  main{background:#fff;padding:0 0 30px;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(22,26,35,.04),0 8px 24px rgba(22,26,35,.08);max-width:440px;width:100%;text-align:center}
-  .banner{background:linear-gradient(165deg, var(--accent-2), var(--accent));padding:26px 20px 22px;color:#fff;margin-bottom:22px}
-  .banner svg{width:40px;height:40px;margin-bottom:8px}
-  .banner div{font-size:13px;font-weight:700;letter-spacing:.1em}
-  main .inner{padding:0 30px}
+  main{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(22,26,35,.04),0 8px 24px rgba(22,26,35,.08);max-width:440px;width:100%;text-align:center}
+  .cobrand{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px 12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .cobrand-logo{display:flex;align-items:center;gap:7px}
+  .cobrand-logo svg{flex:none}
+  .cobrand-logo span{font-size:13.5px;font-weight:800}
+  .cobrand-logo.n span{color:#241a4d}
+  .cobrand-logo.y span{color:var(--accent)}
+  .cobrand-x{font-size:12px;color:#9298a6;font-weight:600}
+  .banner{background:linear-gradient(165deg, var(--accent-2), var(--accent));padding:24px 20px 20px;color:#fff}
+  .banner svg{width:36px;height:36px;margin-bottom:6px}
+  .banner div{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.9}
+  .inner{padding:26px 28px 32px}
   .check{width:52px;height:52px;border-radius:50%;background:#e9f6ee;color:#2f9e55;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:26px}
   h1{font-size:19px;margin:0 0 14px}
   p{font-size:14px;color:var(--ink-2);line-height:1.7;margin:0}
   .notice{margin-top:18px;background:#fff6e8;border:1px solid #f0dcb0;border-radius:12px;padding:14px 16px;font-size:13px;color:#6b5323;line-height:1.7;text-align:left}
 </style></head>
 <body><main>
-<div class="check">✓</div>
-<h1>感謝您的填寫${name ? '，' + name : ''}</h1>
-<p>我們已經收到您的資料，將盡快與您聯繫。</p>
-<div class="notice">${closingNotice}</div>
+<div class="cobrand">
+  <div class="cobrand-logo n">
+    <svg width="18" height="18" viewBox="0 0 40 40" role="img" aria-label="nSchool">
+      <polyline points="7,30 18,10 23,22 33,6" fill="none" stroke="#d7d4e8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(-2,2)"/>
+      <polyline points="7,30 18,10 23,22 33,6" fill="none" stroke="var(--n-accent)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>nSchool</span>
+  </div>
+  <div class="cobrand-x">×</div>
+  <div class="cobrand-logo y">
+    <svg width="16" height="16" viewBox="0 0 100 100" role="img" aria-label="元大證券">
+      <g fill="var(--accent)">
+        <path d="M50,50 L50,6 A44,44 0 0,1 83,25 Z"/>
+        <path d="M50,50 L94,50 A44,44 0 0,1 75,83 Z"/>
+        <path d="M50,50 L50,94 A44,44 0 0,1 17,75 Z"/>
+        <path d="M50,50 L6,50 A44,44 0 0,1 25,17 Z"/>
+      </g>
+    </svg>
+    <span>元大證券</span>
+  </div>
+</div>
+<div class="inner">
+  <div class="check">✓</div>
+  <h1>感謝您的填寫${name ? '，' + name : ''}</h1>
+  <p>我們已經收到您的資料，將盡快與您聯繫。</p>
+  <div class="notice">${closingNotice}</div>
+</div>
 </main></body></html>`);
 }
