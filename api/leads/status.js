@@ -58,6 +58,8 @@ export default async function handler(req, res) {
         data.completedAt = completedAt || null;
       } else if (status === '完成' && !data.completedAt) {
         data.completedAt = new Date().toISOString();
+      } else if (status !== undefined && status !== '完成') {
+        data.completedAt = null;
       }
 
       const newBlock = `<!-- LEAD_DATA ${JSON.stringify(data)} -->`;
