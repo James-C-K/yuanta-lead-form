@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>名單追蹤後台</title>
+<style>
+  :root{
+    --ink:#161a23;--ink-2:#555d6e;--ink-3:#9298a6;
+    --line:#e4e7ee;--paper:#eef1f7;--card:#ffffff;
+    --accent:#0b57a4;--accent-2:#2f8fe0;--accent-soft:#e7f1fc;
+    --pending:#9298a6;--pending-soft:#f0f1f4;
+    --contacting:#a5720f;--contacting-soft:#faf0d8;
+    --done:#2f9e55;--done-soft:#e9f6ee;
+    --danger:#c0392b;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(22,26,35,.04),0 8px 24px rgba(22,26,35,.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;
+    background:var(--paper);color:var(--ink);font-size:14.5px;line-height:1.6;
+    min-height:100vh;
+  }
+  .topbar{
+    background:linear-gradient(165deg, var(--accent-2), var(--accent));
+    color:#fff;padding:20px 16px 18px;
+  }
+  .topbar h1{margin:0;font-size:18px;}
+  .topbar p{margin:2px 0 0;font-size:12px;color:rgba(255,255,255,.8);}
+  .wrap{max-width:760px;margin:0 auto;padding:18px 14px 60px;}
+
+  /* ---- Gate ---- */
+  #gate{
+    max-width:360px;margin:80px auto;padding:28px 26px;
+    background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);text-align:center;
+  }
+  #gate h2{font-size:17px;margin:0 0 6px;}
+  #gate p{font-size:13px;color:var(--ink-3);margin:0 0 18px;}
+  #gate input{
+    width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:9px;
+    font-size:14px;margin-bottom:12px;
+  }
+  #gate button{
+    width:100%;padding:11px;border:none;border-radius:9px;
+    background:var(--accent);color:#fff;font-weight:700;font-size:14px;cursor:pointer;
+  }
+  #gateError{color:var(--danger);font-size:12.5px;margin-top:10px;display:none;}
+
+  /* ---- Toolbar ---- */
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;align-items:center;}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;}
+  .tab{
+    padding:7px 14px;border-radius:999px;border:1.5px solid var(--line);
+    background:var(--card);font-size:12.5px;font-weight:600;color:var(--ink-2);cursor:pointer;
+  }
+  .tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .search{flex:1;min-width:160px;}
+  .search input{
+    width:100%;padding:8px 12px;border:1.5px solid var(--line);border-radius:9px;font-size:13px;
+  }
+  .refresh{
+    padding:8px 14px;border-radius:9px;border:1.5px solid var(--line);background:var(--card);
+    font-size:12.5px;font-weight:600;color:var(--ink-2);cursor:pointer;
+  }
+
+  .empty{text-align:center;color:var(--ink-3);padding:60px 20px;font-size:13.5px;}
+
+  .card{
+    background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:16px 18px;margin-bottom:12px;
+  }
+  .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;}
+  .card-name{font-size:15.5px;font-weight:700;}
+  .card-name.done{color:var(--ink-3);}
+  .card-sub{font-size:12px;color:var(--ink-3);margin-top:2px;}
+  .card-link{font-size:11.5px;color:var(--accent);text-decoration:none;white-space:nowrap;}
+
+  .rows{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;font-size:13px;margin-bottom:12px;}
+  .rows .k{color:var(--ink-3);}
+  .rows .v{color:var(--ink);}
+
+  .status-row{display:flex;gap:6px;flex-wrap:wrap;}
+  .status-pill{
+    padding:6px 13px;border-radius:999px;border:1.5px solid var(--line);
+    font-size:12px;font-weight:700;cursor:pointer;background:var(--card);color:var(--ink-2);
+  }
+  .status-pill[data-s="待處理"].active{background:var(--pending-soft);border-color:var(--pending);color:#555;}
+  .status-pill[data-s="聯絡中"].active{background:var(--contacting-soft);border-color:var(--contacting);color:var(--contacting);}
+  .status-pill[data-s="完成"].active{background:var(--done-soft);border-color:var(--done);color:var(--done);}
+  .status-pill:disabled{opacity:.5;cursor:wait;}
+
+  .notes-line{font-size:12.5px;color:var(--ink-2);margin-top:10px;padding-top:10px;border-top:1px solid var(--line);}
+
+  .dates-row{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;
+    margin-top:12px;padding-top:12px;border-top:1px solid var(--line);
+  }
+  .date-field label{font-size:11px;color:var(--ink-3);font-weight:600;display:block;margin-bottom:4px;}
+  .date-field input{
+    width:100%;padding:7px 9px;border:1.5px solid var(--line);border-radius:8px;
+    font-size:12.5px;font-family:inherit;color:var(--ink);
+  }
+  .date-field input:disabled{opacity:.5;}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <h2>名單追蹤後台</h2>
+  <p>請輸入存取密鑰</p>
+  <input type="password" id="tokenInput" placeholder="Access Token">
+  <button id="gateBtn">進入</button>
+  <div id="gateError">密鑰錯誤，請再試一次</div>
+</div>
+
+<div id="app" style="display:none;">
+  <div class="topbar">
+    <h1>元大證券 名單追蹤</h1>
+    <p>資料來源：GitHub Issues（James-C-K/yuanta-lead-data）</p>
+  </div>
+  <div class="wrap">
+    <div class="toolbar">
+      <div class="tabs" id="tabs">
+        <div class="tab active" data-f="all">全部</div>
+        <div class="tab" data-f="待處理">待處理</div>
+        <div class="tab" data-f="聯絡中">聯絡中</div>
+        <div class="tab" data-f="完成">完成</div>
+      </div>
+      <div class="search"><input type="text" id="searchInput" placeholder="搜尋姓名 / 券商 / 電話 / LINE ID"></div>
+      <button class="refresh" id="refreshBtn">重新整理</button>
+    </div>
+    <div id="list"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var API = '';
+  var token = localStorage.getItem('adminToken') || '';
+  var urlToken = new URLSearchParams(location.search).get('token');
+  if (urlToken) {
+    token = urlToken;
+    localStorage.setItem('adminToken', token);
+    history.replaceState({}, '', location.pathname);
+  }
+
+  var gate = document.getElementById('gate');
+  var app = document.getElementById('app');
+  var leads = [];
+  var currentFilter = 'all';
+  var currentSearch = '';
+
+  function authHeaders() {
+    return { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' };
+  }
+
+  function showGate(errored) {
+    gate.style.display = 'block';
+    app.style.display = 'none';
+    document.getElementById('gateError').style.display = errored ? 'block' : 'none';
+  }
+
+  function showApp() {
+    gate.style.display = 'none';
+    app.style.display = 'block';
+  }
+
+  function fmtTime(s) {
+    if (!s) return '';
+    try { return new Date(s).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false }); }
+    catch (e) { return s; }
+  }
+
+  function contactLine(l) {
+    if (l.preferredContact === '手機') return '📞 ' + (l.phone || '-');
+    if (l.preferredContact === 'LINE') return '💬 ' + (l.lineId || '-');
+    return '-';
+  }
+
+  function toLocalInput(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d)) return '';
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
+  function fromLocalInput(val) {
+    if (!val) return null;
+    var d = new Date(val);
+    return isNaN(d) ? null : d.toISOString();
+  }
+
+  function render() {
+    var list = document.getElementById('list');
+    var filtered = leads.filter(function (l) {
+      if (currentFilter !== 'all' && l.status !== currentFilter) return false;
+      if (currentSearch) {
+        var hay = [l.name, l.broker, l.phone, l.lineId].join(' ').toLowerCase();
+        if (hay.indexOf(currentSearch.toLowerCase()) === -1) return false;
+      }
+      return true;
+    });
+
+    if (!filtered.length) {
+      list.innerHTML = '<div class="empty">沒有符合條件的名單</div>';
+      return;
+    }
+
+    list.innerHTML = filtered.map(function (l) {
+      var statuses = ['待處理', '聯絡中', '完成'];
+      var pills = statuses.map(function (s) {
+        return '<button class="status-pill' + (l.status === s ? ' active' : '') + '" data-s="' + s + '" data-n="' + l.number + '">' + s + '</button>';
+      }).join('');
+
+      return '' +
+        '<div class="card" data-n="' + l.number + '">' +
+          '<div class="card-head">' +
+            '<div>' +
+              '<div class="card-name' + (l.status === '完成' ? ' done' : '') + '">' + escapeHtml(l.name) + '</div>' +
+              '<div class="card-sub">提交於 ' + fmtTime(l.submittedAt) + '</div>' +
+            '</div>' +
+            '<a class="card-link" href="' + l.htmlUrl + '" target="_blank" rel="noopener">GitHub #' + l.number + '</a>' +
+          '</div>' +
+          '<div class="rows">' +
+            '<div class="k">券商</div><div class="v">' + escapeHtml(l.broker || '-') + '　折數 ' + escapeHtml(l.feeDiscount || '-') + '</div>' +
+            '<div class="k">聯絡</div><div class="v">' + escapeHtml(contactLine(l)) + '　(' + escapeHtml(l.convenientTime || '-') + ')</div>' +
+          '</div>' +
+          '<div class="status-row">' + pills + '</div>' +
+          (l.notes ? '<div class="notes-line">💬 ' + escapeHtml(l.notes) + '</div>' : '') +
+          '<div class="dates-row">' +
+            '<div class="date-field">' +
+              '<label>預計處理時間</label>' +
+              '<input type="datetime-local" data-field="plannedAt" data-n="' + l.number + '" value="' + toLocalInput(l.plannedAt) + '">' +
+            '</div>' +
+            '<div class="date-field">' +
+              '<label>已完成時間</label>' +
+              '<input type="datetime-local" data-field="completedAt" data-n="' + l.number + '" value="' + toLocalInput(l.completedAt) + '">' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+    }).join('');
+
+    list.querySelectorAll('.status-pill').forEach(function (btn) {
+      btn.addEventListener('click', function () { updateStatus(btn.dataset.n, btn.dataset.s, btn); });
+    });
+    list.querySelectorAll('input[data-field]').forEach(function (inp) {
+      inp.addEventListener('change', function () { updateDateField(inp); });
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function updateStatus(number, status, btn) {
+    var card = btn.closest('.card');
+    card.querySelectorAll('.status-pill').forEach(function (b) { b.disabled = true; });
+    fetch(API + '/api/leads/status', {
+      method: 'POST', headers: authHeaders(),
+      body: JSON.stringify({ number: Number(number), status: status }),
+    }).then(function (r) {
+      if (!r.ok) throw new Error('update failed');
+      return r.json();
+    }).then(function (res) {
+      var lead = leads.find(function (l) { return l.number === Number(number); });
+      if (lead) {
+        lead.status = status;
+        if (res.completedAt !== undefined) lead.completedAt = res.completedAt || '';
+        if (res.plannedAt !== undefined) lead.plannedAt = res.plannedAt || '';
+      }
+      render();
+    }).catch(function () {
+      alert('狀態更新失敗，請重試');
+      card.querySelectorAll('.status-pill').forEach(function (b) { b.disabled = false; });
+    });
+  }
+
+  function updateDateField(inp) {
+    var number = Number(inp.dataset.n);
+    var field = inp.dataset.field;
+    var iso = fromLocalInput(inp.value);
+    var payload = { number: number };
+    payload[field] = iso;
+    inp.disabled = true;
+    fetch(API + '/api/leads/status', {
+      method: 'POST', headers: authHeaders(),
+      body: JSON.stringify(payload),
+    }).then(function (r) {
+      if (!r.ok) throw new Error('update failed');
+      var lead = leads.find(function (l) { return l.number === number; });
+      if (lead) lead[field] = iso || '';
+    }).catch(function () {
+      alert('時間更新失敗，請重試');
+    }).finally(function () {
+      inp.disabled = false;
+    });
+  }
+
+  function load() {
+    document.getElementById('list').innerHTML = '<div class="empty">讀取中…</div>';
+    fetch(API + '/api/leads', { headers: authHeaders() })
+      .then(function (r) {
+        if (r.status === 401) { showGate(true); throw new Error('unauthorized'); }
+        if (!r.ok) throw new Error('load failed');
+        return r.json();
+      })
+      .then(function (data) {
+        leads = data.leads || [];
+        showApp();
+        render();
+      })
+      .catch(function (err) {
+        if (err.message !== 'unauthorized') {
+          document.getElementById('list').innerHTML = '<div class="empty">讀取失敗，請按「重新整理」再試一次</div>';
+        }
+      });
+  }
+
+  document.getElementById('gateBtn').addEventListener('click', function () {
+    token = document.getElementById('tokenInput').value.trim();
+    if (!token) return;
+    localStorage.setItem('adminToken', token);
+    load();
+  });
+  document.getElementById('tokenInput').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') document.getElementById('gateBtn').click();
+  });
+
+  document.getElementById('tabs').addEventListener('click', function (e) {
+    if (!e.target.classList.contains('tab')) return;
+    document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
+    e.target.classList.add('active');
+    currentFilter = e.target.dataset.f;
+    render();
+  });
+
+  document.getElementById('searchInput').addEventListener('input', function (e) {
+    currentSearch = e.target.value;
+    render();
+  });
+
+  document.getElementById('refreshBtn').addEventListener('click', load);
+
+  if (token) load(); else showGate(false);
+})();
+</script>
+</body>
+</html>

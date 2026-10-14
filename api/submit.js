@@ -34,6 +34,13 @@ function buildPayloads(body) {
   if (isPhone && smsConsent) contactLines.push(`- 同意簡訊聯繫：${smsConsent}`);
 
   const issueTitle = `[新名單] ${name || '未填姓名'} - ${broker || '未填券商'}`;
+
+  const leadData = {
+    name, broker, feeDiscount, preferredContact, phone, lineId,
+    convenientTime, smsConsent, notes, consent, submittedAt,
+    plannedAt: null, completedAt: null,
+  };
+
   const issueBody = [
     `**提交時間**：${submittedAt}`,
     `**個資使用同意**：${consent}`,
@@ -49,6 +56,8 @@ function buildPayloads(body) {
     '',
     '### 其他想說的話',
     notes,
+    '',
+    `<!-- LEAD_DATA ${JSON.stringify(leadData)} -->`,
   ].join('\n');
 
   const bodyContents = [
@@ -117,7 +126,7 @@ export default async function handler(req, res) {
           Accept: 'application/vnd.github+json',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ title: issueTitle, body: issueBody }),
+        body: JSON.stringify({ title: issueTitle, body: issueBody, labels: ['待處理'] }),
       }
     );
     results.github = { ok: ghRes.ok, status: ghRes.status };
