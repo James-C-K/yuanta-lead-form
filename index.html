@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>元大證券客戶資料表單</title>
+<style>
+  :root{
+    --ink:#1c1f26;
+    --ink-2:#565b66;
+    --ink-3:#8a8f99;
+    --line:#e2e5ec;
+    --paper:#f4f6fb;
+    --card:#ffffff;
+    --accent:#2b5cad;
+    --accent-ink:#ffffff;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    font-size:15px;
+    line-height:1.6;
+    padding:28px 16px 60px;
+  }
+  .wrap{max-width:640px;margin:0 auto;}
+  .hero{
+    background:var(--card);
+    border-radius:var(--radius);
+    border:1px solid var(--line);
+    overflow:hidden;
+    margin-bottom:16px;
+  }
+  .hero-bar{height:8px;background:var(--accent);}
+  .hero-body{padding:24px 24px 20px;}
+  .hero h1{font-size:22px;margin:0 0 10px;}
+  .hero p{color:var(--ink-2);font-size:14px;margin:0;}
+  .required-note{color:#c0392b;font-size:12.5px;margin-top:14px;}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px 24px;
+    margin-bottom:14px;
+  }
+  .card.notice{
+    background:#fff7e6;
+    border-color:#f1d9a8;
+  }
+  .q-label{font-size:15px;font-weight:600;margin-bottom:14px;}
+  .q-label .req{color:#c0392b;margin-left:3px;}
+  .q-sub{font-size:12.5px;color:var(--ink-3);margin-top:-8px;margin-bottom:14px;}
+
+  input[type="text"],
+  input[type="tel"],
+  textarea{
+    width:100%;
+    border:none;
+    border-bottom:1.5px solid var(--line);
+    padding:8px 2px;
+    font-size:14.5px;
+    font-family:inherit;
+    color:var(--ink);
+    background:transparent;
+  }
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  textarea:focus{
+    outline:none;
+    border-bottom-color:var(--accent);
+  }
+  textarea{resize:vertical;min-height:72px;}
+
+  .radio-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:9px 0;
+    cursor:pointer;
+  }
+  .radio-row input[type="radio"]{
+    width:18px;height:18px;
+    accent-color:var(--accent);
+    flex:none;
+  }
+  .radio-row span{font-size:14.5px;}
+  .radio-other{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    width:100%;
+  }
+  .radio-other input[type="text"]{flex:1;}
+
+  .submit-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:18px;
+  }
+  button[type="submit"]{
+    background:var(--accent);
+    color:var(--accent-ink);
+    border:none;
+    border-radius:8px;
+    padding:12px 28px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  button[type="submit"]:hover{background:#234a8c;}
+  button[type="submit"]:disabled{background:#aab7cc;cursor:not-allowed;}
+  .footnote{font-size:12px;color:var(--ink-3);text-align:center;margin-top:24px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="hero-bar"></div>
+    <div class="hero-body">
+      <h1>元大證券</h1>
+      <p>感謝您的耐心填寫，會按照您所填寫的內容與您聯繫 🙏</p>
+      <p class="required-note">* 表示必填問題</p>
+    </div>
+  </div>
+
+  <form id="leadForm" method="POST" action="https://ooschoolall.zeabur.app/webhook/yuanta-lead-form">
+
+    <div class="card notice">
+      <div class="q-label">⚠️ 以下填寫內容僅供聯絡辦理使用，不於以其他用途請放心填寫 <span class="req">*</span></div>
+      <label class="radio-row"><input type="radio" name="consent" value="瞭解" required><span>瞭解</span></label>
+      <label class="radio-row"><input type="radio" name="consent" value="不瞭解" required><span>不瞭解</span></label>
+    </div>
+
+    <div class="card">
+      <div class="q-label">姓名 / 稱呼 <span class="req">*</span></div>
+      <input type="text" name="name" required>
+    </div>
+
+    <div class="card">
+      <div class="q-label">目前使用的券商 <span class="req">*</span></div>
+      <input type="text" name="broker" required>
+    </div>
+
+    <div class="card">
+      <div class="q-label">目前手續費折數 <span class="req">*</span></div>
+      <input type="text" name="feeDiscount" required>
+    </div>
+
+    <div class="card">
+      <div class="q-label">偏好聯絡方式 <span class="req">*</span></div>
+      <label class="radio-row"><input type="radio" name="preferredContact" value="手機" required><span>手機</span></label>
+      <label class="radio-row"><input type="radio" name="preferredContact" value="LINE" required><span>LINE</span></label>
+    </div>
+
+    <div class="card">
+      <div class="q-label">LINE ID <span class="req">*</span></div>
+      <input type="text" name="lineId" required>
+    </div>
+
+    <div class="card">
+      <div class="q-label">聯絡電話 <span class="req">*</span></div>
+      <input type="tel" name="phone" required>
+    </div>
+
+    <div class="card">
+      <div class="q-label">方便聯繫的時段 <span class="req">*</span></div>
+      <label class="radio-row"><input type="radio" name="convenientTime" value="早上" required><span>早上</span></label>
+      <label class="radio-row"><input type="radio" name="convenientTime" value="中午" required><span>中午</span></label>
+      <label class="radio-row"><input type="radio" name="convenientTime" value="下午" required><span>下午</span></label>
+      <label class="radio-row"><input type="radio" name="convenientTime" value="時間都可" required><span>時間都可</span></label>
+    </div>
+
+    <div class="card">
+      <div class="q-label">是否同意發送手機簡訊提供聯繫方式給您</div>
+      <label class="radio-row"><input type="radio" name="smsConsent" value="同意"><span>同意</span></label>
+      <label class="radio-row"><input type="radio" name="smsConsent" value="不同意"><span>不同意</span></label>
+      <label class="radio-row">
+        <input type="radio" name="smsConsent" value="其他" id="smsOtherRadio">
+        <span class="radio-other">其他：<input type="text" id="smsOtherText" placeholder=""></span>
+      </label>
+    </div>
+
+    <div class="card">
+      <div class="q-label">其他想說的話</div>
+      <textarea name="notes"></textarea>
+    </div>
+
+    <div class="card">
+      <p style="margin:0;font-size:13.5px;color:var(--ink-2);">請注意手機號碼的來電或簡訊，或是您也可以致電給我，敝姓：沈，告訴我您有填表單我就會知道了，感謝您。</p>
+      <div class="submit-row">
+        <button type="submit">提交</button>
+      </div>
+    </div>
+
+  </form>
+
+  <p class="footnote">本表單資料僅供聯絡辦理使用。</p>
+</div>
+
+<script>
+  document.getElementById('leadForm').addEventListener('submit', function () {
+    var otherRadio = document.getElementById('smsOtherRadio');
+    var otherText = document.getElementById('smsOtherText');
+    if (otherRadio.checked && otherText.value.trim()) {
+      otherRadio.value = otherText.value.trim();
+    }
+  });
+</script>
+</body>
+</html>
