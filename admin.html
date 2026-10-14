@@ -130,10 +130,18 @@
   .date-field{min-width:0;}
   .date-field label{font-size:11px;color:var(--ink-3);font-weight:600;display:block;margin-bottom:4px;}
   .date-field input{
-    width:100%;max-width:100%;min-width:0;padding:7px 6px;border:1.5px solid var(--line);border-radius:8px;
+    -webkit-appearance:none;appearance:none;
+    width:100%;max-width:100%;min-width:0;box-sizing:border-box;
+    padding:7px 6px;border:1.5px solid var(--line);border-radius:8px;background:#fff;
     font-size:12px;font-family:inherit;color:var(--ink);
   }
   .date-field input:disabled{opacity:.5;}
+  .date-quick{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap;}
+  .date-quick button{
+    padding:4px 9px;border-radius:7px;border:1.5px solid var(--line);background:#fff;
+    font-size:11px;font-weight:600;color:var(--ink-2);cursor:pointer;
+  }
+  .date-quick button:disabled{opacity:.5;}
 
   @media (max-width:420px){
     .dates-row{grid-template-columns:1fr;}
@@ -284,10 +292,19 @@
               '<div class="date-field">' +
                 '<label>預計處理時間</label>' +
                 '<input type="datetime-local" data-field="plannedAt" data-n="' + l.number + '" value="' + toLocalInput(l.plannedAt) + '">' +
+                '<div class="date-quick">' +
+                  '<button type="button" data-n="' + l.number + '" data-field="plannedAt" data-quick="3h">3小時後</button>' +
+                  '<button type="button" data-n="' + l.number + '" data-field="plannedAt" data-quick="tomorrow9">明天9點</button>' +
+                  '<button type="button" data-n="' + l.number + '" data-field="plannedAt" data-quick="clear">清除</button>' +
+                '</div>' +
               '</div>' +
               '<div class="date-field">' +
                 '<label>已完成時間</label>' +
                 '<input type="datetime-local" data-field="completedAt" data-n="' + l.number + '" value="' + toLocalInput(l.completedAt) + '">' +
+                '<div class="date-quick">' +
+                  '<button type="button" data-n="' + l.number + '" data-field="completedAt" data-quick="now">設為現在</button>' +
+                  '<button type="button" data-n="' + l.number + '" data-field="completedAt" data-quick="clear">清除</button>' +
+                '</div>' +
               '</div>' +
             '</div>' +
           '</div>' +
@@ -300,6 +317,12 @@
     list.querySelectorAll('input[data-field]').forEach(function (inp) {
       inp.addEventListener('change', function () { updateDateField(inp); });
       inp.addEventListener('click', function (e) { e.stopPropagation(); });
+    });
+    list.querySelectorAll('button[data-quick]').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        applyQuickDate(btn.dataset.n, btn.dataset.field, btn.dataset.quick, btn);
+      });
     });
     list.querySelectorAll('details.card').forEach(function (d) {
       d.addEventListener('toggle', function () {
@@ -343,25 +366,60 @@
     });
   }
 
-  function updateDateField(inp) {
-    var number = Number(inp.dataset.n);
-    var field = inp.dataset.field;
-    var iso = fromLocalInput(inp.value);
+  function saveDateField(number, field, iso) {
     var payload = { number: number };
     payload[field] = iso;
-    inp.disabled = true;
-    fetch(API + '/api/leads/status', {
+    return fetch(API + '/api/leads/status', {
       method: 'POST', headers: authHeaders(),
       body: JSON.stringify(payload),
     }).then(function (r) {
       if (!r.ok) throw new Error('update failed');
       var lead = leads.find(function (l) { return l.number === number; });
       if (lead) lead[field] = iso || '';
-    }).catch(function () {
-      alert('時間更新失敗，請重試');
-    }).finally(function () {
-      inp.disabled = false;
     });
+  }
+
+  function updateDateField(inp) {
+    var number = Number(inp.dataset.n);
+    var field = inp.dataset.field;
+    var iso = fromLocalInput(inp.value);
+    inp.disabled = true;
+    saveDateField(number, field, iso)
+      .catch(function () { alert('時間更新失敗，請重試'); })
+      .finally(function () { inp.disabled = false; });
+  }
+
+  function quickDateIso(kind) {
+    var now = new Date();
+    if (kind === 'now') return now.toISOString();
+    if (kind === 'clear') return null;
+    if (kind === '3h') {
+      var h = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+      return h.toISOString();
+    }
+    if (kind === 'tomorrow9') {
+      var t = new Date(now);
+      t.setDate(t.getDate() + 1);
+      t.setHours(9, 0, 0, 0);
+      return t.toISOString();
+    }
+    return null;
+  }
+
+  function applyQuickDate(number, field, kind, btn) {
+    number = Number(number);
+    var iso = quickDateIso(kind);
+    var group = btn.closest('.date-field');
+    group.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
+    saveDateField(number, field, iso)
+      .then(function () {
+        var inp = group.querySelector('input[data-field="' + field + '"]');
+        if (inp) inp.value = toLocalInput(iso);
+      })
+      .catch(function () { alert('時間更新失敗，請重試'); })
+      .finally(function () {
+        group.querySelectorAll('button').forEach(function (b) { b.disabled = false; });
+      });
   }
 
   function load() {
