@@ -24,6 +24,14 @@ function buildPayloads(body) {
   const consent = (body.consent || '').trim();
 
   const submittedAt = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false });
+  const isPhone = preferredContact === '手機';
+  const isLine = preferredContact === 'LINE';
+
+  const contactLines = [];
+  if (isPhone) contactLines.push(`- 聯絡電話：${phone}`);
+  if (isLine) contactLines.push(`- LINE ID：${lineId}`);
+  contactLines.push(`- 方便聯繫時段：${convenientTime}`);
+  if (isPhone && smsConsent) contactLines.push(`- 同意簡訊聯繫：${smsConsent}`);
 
   const issueTitle = `[新名單] ${name || '未填姓名'} - ${broker || '未填券商'}`;
   const issueBody = [
@@ -33,10 +41,7 @@ function buildPayloads(body) {
     '### 聯絡資訊',
     `- 姓名/稱呼：${name}`,
     `- 偏好聯絡方式：${preferredContact}`,
-    `- 聯絡電話：${phone}`,
-    `- LINE ID：${lineId}`,
-    `- 方便聯繫時段：${convenientTime}`,
-    `- 同意簡訊聯繫：${smsConsent}`,
+    ...contactLines,
     '',
     '### 券商資訊',
     `- 目前使用券商：${broker}`,
@@ -52,11 +57,11 @@ function buildPayloads(body) {
     mkRow('手續費折數', feeDiscount),
     { type: 'separator', margin: 'md' },
     mkRow('偏好聯絡方式', preferredContact),
-    mkRow('聯絡電話', phone),
-    mkRow('LINE ID', lineId),
-    mkRow('方便時段', convenientTime),
-    mkRow('簡訊同意', smsConsent),
   ];
+  if (isPhone) bodyContents.push(mkRow('聯絡電話', phone));
+  if (isLine) bodyContents.push(mkRow('LINE ID', lineId));
+  bodyContents.push(mkRow('方便時段', convenientTime));
+  if (isPhone && smsConsent) bodyContents.push(mkRow('簡訊同意', smsConsent));
   if (notes !== '（無）') {
     bodyContents.push({ type: 'separator', margin: 'md' });
     bodyContents.push({ type: 'text', text: '其他想說的話', size: 'xs', color: '#999999', margin: 'md' });
@@ -159,10 +164,14 @@ export default async function handler(req, res) {
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.status(200).send(`<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>已送出</title>
 <style>
-  :root{--accent:#2a3eb1;--ink:#161a23;--ink-2:#555d6e}
+  :root{--accent:#0b57a4;--accent-2:#2f8fe0;--ink:#161a23;--ink-2:#555d6e}
   *{box-sizing:border-box}
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;background:radial-gradient(1200px 500px at 50% -10%, #e7eaff 0%, #eef1f7 55%);display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;color:var(--ink)}
-  main{background:#fff;padding:36px 30px;border-radius:16px;box-shadow:0 1px 2px rgba(22,26,35,.04),0 8px 24px rgba(22,26,35,.08);max-width:440px;text-align:center}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;background:radial-gradient(1200px 500px at 50% -10%, #e7f1fc 0%, #eef1f7 55%);display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;color:var(--ink)}
+  main{background:#fff;padding:0 0 30px;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(22,26,35,.04),0 8px 24px rgba(22,26,35,.08);max-width:440px;width:100%;text-align:center}
+  .banner{background:linear-gradient(165deg, var(--accent-2), var(--accent));padding:26px 20px 22px;color:#fff;margin-bottom:22px}
+  .banner svg{width:40px;height:40px;margin-bottom:8px}
+  .banner div{font-size:13px;font-weight:700;letter-spacing:.1em}
+  main .inner{padding:0 30px}
   .check{width:52px;height:52px;border-radius:50%;background:#e9f6ee;color:#2f9e55;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:26px}
   h1{font-size:19px;margin:0 0 14px}
   p{font-size:14px;color:var(--ink-2);line-height:1.7;margin:0}

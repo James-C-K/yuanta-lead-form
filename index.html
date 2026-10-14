@@ -12,10 +12,12 @@
     --line:#e4e7ee;
     --paper:#eef1f7;
     --card:#ffffff;
-    --accent:#2a3eb1;
-    --accent-2:#4d5fd1;
-    --accent-soft:#eceeff;
+    --accent:#0b57a4;
+    --accent-2:#2f8fe0;
+    --accent-soft:#e7f1fc;
     --accent-ink:#ffffff;
+    --n-accent:#6d3df0;
+    --n-accent-2:#9b6bfb;
     --danger:#c0392b;
     --radius:16px;
     --shadow:0 1px 2px rgba(22,26,35,.04), 0 8px 24px rgba(22,26,35,.06);
@@ -25,32 +27,76 @@
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;
     background:
-      radial-gradient(1200px 500px at 50% -10%, #e7eaff 0%, var(--paper) 55%);
+      radial-gradient(1200px 500px at 50% -10%, #e7f1fc 0%, var(--paper) 55%);
     color:var(--ink);
     font-size:15px;
     line-height:1.6;
     min-height:100vh;
-    padding:32px 16px 64px;
+    padding:0 16px 64px;
   }
   .wrap{max-width:560px;margin:0 auto;}
 
+  /* ---- Co-brand strip ---- */
+  .cobrand{
+    margin:0 -16px;
+    padding:16px 16px;
+    background:#ffffff;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:center;
+    gap:10px 14px;
+  }
+  .cobrand-logo{display:flex;align-items:center;gap:8px;}
+  .cobrand-logo svg{flex:none;}
+  .cobrand-logo .nmark{width:22px;height:22px;}
+  .cobrand-logo .ymark{width:20px;height:20px;}
+  .cobrand-logo span{font-size:15px;font-weight:800;letter-spacing:-.01em;}
+  .cobrand-logo.n span{color:#241a4d;}
+  .cobrand-logo.y span{color:var(--accent);}
+  .cobrand-x{font-size:13px;color:var(--ink-3);font-weight:600;}
+  @media (min-width:600px){
+    .cobrand{
+      margin:24px auto 0;
+      max-width:560px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      border:1px solid var(--line);
+      border-bottom:none;
+    }
+  }
+
   /* ---- Header ---- */
   .brandbar{
+    margin:0 -16px 22px;
+    padding:22px 16px 24px;
+    background:linear-gradient(165deg, var(--accent-2) 0%, var(--accent) 100%);
     display:flex;
+    flex-direction:column;
     align-items:center;
-    gap:12px;
-    margin-bottom:20px;
+    text-align:center;
+    gap:10px;
   }
   .brandmark{
-    width:40px;height:40px;border-radius:11px;
-    background:linear-gradient(155deg, var(--accent), var(--accent-2));
-    display:flex;align-items:center;justify-content:center;
-    color:#fff;font-weight:700;font-size:17px;
+    width:56px;height:56px;
     flex:none;
-    box-shadow:0 4px 14px rgba(42,62,177,.3);
   }
-  .brandtext h1{font-size:18px;margin:0;letter-spacing:.2px;}
-  .brandtext p{font-size:12.5px;color:var(--ink-3);margin:1px 0 0;}
+  .brandtext h1{
+    font-size:22px;margin:0;letter-spacing:.04em;
+    color:#fff;font-weight:700;
+  }
+  .brandtext p{
+    font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:rgba(255,255,255,.78);margin:2px 0 0;
+  }
+  @media (min-width:600px){
+    .brandbar{
+      margin:0 auto 22px;
+      border-radius:0 0 var(--radius) var(--radius);
+      max-width:560px;
+      box-shadow:0 10px 28px rgba(11,87,164,.22);
+    }
+  }
 
   /* ---- Progress ---- */
   .progress{margin-bottom:22px;}
@@ -131,7 +177,7 @@
     cursor:pointer;
     transition:border-color .15s, background .15s;
   }
-  .choice:hover{border-color:#c6cbf5;}
+  .choice:hover{border-color:#a9cdf0;}
   .choice input{
     width:18px;height:18px;accent-color:var(--accent);flex:none;
   }
@@ -170,9 +216,9 @@
   }
   .btn-primary{
     background:var(--accent);color:var(--accent-ink);
-    box-shadow:0 4px 14px rgba(42,62,177,.25);
+    box-shadow:0 4px 14px rgba(11,87,164,.28);
   }
-  .btn-primary:hover{background:#243599;}
+  .btn-primary:hover{background:#084a8f;}
   .btn-primary:disabled{background:#c3c8e8;box-shadow:none;cursor:not-allowed;}
   .btn-ghost{
     background:transparent;color:var(--ink-2);
@@ -190,11 +236,46 @@
 <body>
 <div class="wrap">
 
+  <div class="cobrand">
+    <div class="cobrand-logo n">
+      <svg class="nmark" viewBox="0 0 40 40" role="img" aria-label="nSchool 標誌">
+        <defs>
+          <linearGradient id="nGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="var(--n-accent-2)"/>
+            <stop offset="100%" stop-color="var(--n-accent)"/>
+          </linearGradient>
+        </defs>
+        <polyline points="7,30 18,10 23,22 33,6" fill="none" stroke="#d7d4e8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(-2,2)"/>
+        <polyline points="7,30 18,10 23,22 33,6" fill="none" stroke="url(#nGrad)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>nSchool</span>
+    </div>
+    <div class="cobrand-x">×</div>
+    <div class="cobrand-logo y">
+      <svg class="ymark" viewBox="0 0 100 100" role="img" aria-label="元大證券標誌">
+        <g fill="var(--accent)">
+          <path d="M50,50 L50,6 A44,44 0 0,1 83,25 Z"/>
+          <path d="M50,50 L94,50 A44,44 0 0,1 75,83 Z"/>
+          <path d="M50,50 L50,94 A44,44 0 0,1 17,75 Z"/>
+          <path d="M50,50 L6,50 A44,44 0 0,1 25,17 Z"/>
+        </g>
+      </svg>
+      <span>元大證券</span>
+    </div>
+  </div>
+
   <div class="brandbar">
-    <div class="brandmark">元</div>
+    <svg class="brandmark" viewBox="0 0 100 100" role="img" aria-label="元大證券標誌">
+      <g fill="#ffffff">
+        <path d="M50,50 L50,6 A44,44 0 0,1 83,25 Z"/>
+        <path d="M50,50 L94,50 A44,44 0 0,1 75,83 Z"/>
+        <path d="M50,50 L50,94 A44,44 0 0,1 17,75 Z"/>
+        <path d="M50,50 L6,50 A44,44 0 0,1 25,17 Z"/>
+      </g>
+    </svg>
     <div class="brandtext">
       <h1>元大證券</h1>
-      <p>客戶資料聯繫表單</p>
+      <p>Yuanta Securities · 客戶資料聯繫表單</p>
     </div>
   </div>
 
@@ -313,7 +394,7 @@
     </div>
   </form>
 
-  <p class="footnote">本表單資料僅供聯絡辦理使用。</p>
+  <p class="footnote">本頁由 nSchool 投資教育平台與元大證券攜手提供，資料僅供聯絡辦理使用。</p>
 </div>
 
 <script>
