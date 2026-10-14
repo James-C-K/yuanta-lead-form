@@ -38,7 +38,7 @@ function buildPayloads(body) {
   const leadData = {
     name, broker, feeDiscount, preferredContact, phone, lineId,
     convenientTime, smsConsent, notes, consent, submittedAt,
-    plannedAt: null, completedAt: null,
+    completedAt: null,
   };
 
   const issueBody = [

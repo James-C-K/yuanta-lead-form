@@ -26,7 +26,6 @@ function parseIssue(issue) {
     consent: data?.consent || '',
     notes: data?.notes || '',
     submittedAt: data?.submittedAt || issue.created_at,
-    plannedAt: data?.plannedAt || '',
     completedAt: data?.completedAt || '',
     raw: !data,
   };

@@ -15,13 +15,9 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { number, status, plannedAt, completedAt } = req.body || {};
-  if (!number) {
-    res.status(400).json({ error: 'missing number' });
-    return;
-  }
-  if (status !== undefined && !STATUSES.includes(status)) {
-    res.status(400).json({ error: 'invalid status' });
+  const { number, status } = req.body || {};
+  if (!number || !STATUSES.includes(status)) {
+    res.status(400).json({ error: 'invalid number or status' });
     return;
   }
 
@@ -39,51 +35,35 @@ export default async function handler(req, res) {
       return;
     }
     const issue = await getRes.json();
-    const patch = {};
 
-    if (status !== undefined) {
-      const currentLabels = (issue.labels || []).map((l) => (typeof l === 'string' ? l : l.name));
-      const keptLabels = currentLabels.filter((l) => !STATUSES.includes(l));
-      patch.labels = [...keptLabels, status];
+    const currentLabels = (issue.labels || []).map((l) => (typeof l === 'string' ? l : l.name));
+    const keptLabels = currentLabels.filter((l) => !STATUSES.includes(l));
+    const newLabels = [...keptLabels, status];
+
+    const match = DATA_RE.exec(issue.body || '');
+    let data = {};
+    if (match) {
+      try { data = JSON.parse(match[1]); } catch (e) { data = {}; }
     }
+    // completedAt is fully automatic: set on entering 完成, cleared on leaving it.
+    data.completedAt = status === '完成' ? new Date().toISOString() : null;
 
-    if (plannedAt !== undefined || completedAt !== undefined || status !== undefined) {
-      const match = DATA_RE.exec(issue.body || '');
-      let data = {};
-      if (match) {
-        try { data = JSON.parse(match[1]); } catch (e) { data = {}; }
-      }
-      if (plannedAt !== undefined) data.plannedAt = plannedAt || null;
-      if (completedAt !== undefined) {
-        data.completedAt = completedAt || null;
-      } else if (status === '完成' && !data.completedAt) {
-        data.completedAt = new Date().toISOString();
-      } else if (status !== undefined && status !== '完成') {
-        data.completedAt = null;
-      }
-
-      const newBlock = `<!-- LEAD_DATA ${JSON.stringify(data)} -->`;
-      const newBody = match
-        ? issue.body.replace(DATA_RE, newBlock)
-        : `${issue.body || ''}\n\n${newBlock}`;
-      patch.body = newBody;
-    }
+    const newBlock = `<!-- LEAD_DATA ${JSON.stringify(data)} -->`;
+    const newBody = match
+      ? issue.body.replace(DATA_RE, newBlock)
+      : `${issue.body || ''}\n\n${newBlock}`;
 
     const patchRes = await fetch(`https://api.github.com/repos/${repo}/issues/${number}`, {
       method: 'PATCH',
       headers,
-      body: JSON.stringify(patch),
+      body: JSON.stringify({ labels: newLabels, body: newBody }),
     });
     if (!patchRes.ok) {
       res.status(502).json({ error: 'github patch failed', detail: await patchRes.text() });
       return;
     }
-    const updated = await patchRes.json();
-    const m2 = DATA_RE.exec(updated.body || '');
-    let newData = {};
-    if (m2) { try { newData = JSON.parse(m2[1]); } catch (e) {} }
 
-    res.status(200).json({ ok: true, status, plannedAt: newData.plannedAt, completedAt: newData.completedAt });
+    res.status(200).json({ ok: true, status, completedAt: data.completedAt });
   } catch (err) {
     res.status(500).json({ error: String(err) });
   }
