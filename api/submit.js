@@ -135,6 +135,11 @@ export default async function handler(req, res) {
 
   console.log('submit result', JSON.stringify(results));
 
+  if (req.query && req.query.debug === '1') {
+    res.status(200).json(results);
+    return;
+  }
+
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.status(200).send(`<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><title>已送出</title>
 <style>body{font-family:-apple-system,sans-serif;background:#f4f6fb;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;color:#1c1f26}
