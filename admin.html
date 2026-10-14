@@ -103,8 +103,6 @@
   .summary-time{font-size:11px;color:var(--ink-3);flex:none;white-space:nowrap;}
 
   .card-body{padding:0 18px 16px;}
-  .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;}
-  .card-link{font-size:11.5px;color:var(--accent);text-decoration:none;white-space:nowrap;}
 
   .rows{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;font-size:13px;margin-bottom:12px;}
   .rows .k{color:var(--ink-3);}
@@ -123,13 +121,14 @@
   .notes-line{font-size:12.5px;color:var(--ink-2);margin-top:10px;padding-top:10px;border-top:1px solid var(--line);}
 
   .dates-row{
-    display:grid;grid-template-columns:1fr 1fr;gap:10px;
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;
     margin-top:12px;padding-top:12px;border-top:1px solid var(--line);
   }
+  .date-field{min-width:0;}
   .date-field label{font-size:11px;color:var(--ink-3);font-weight:600;display:block;margin-bottom:4px;}
   .date-field input{
-    width:100%;padding:7px 9px;border:1.5px solid var(--line);border-radius:8px;
-    font-size:12.5px;font-family:inherit;color:var(--ink);
+    width:100%;max-width:100%;min-width:0;padding:7px 6px;border:1.5px solid var(--line);border-radius:8px;
+    font-size:12px;font-family:inherit;color:var(--ink);
   }
   .date-field input:disabled{opacity:.5;}
 
@@ -269,13 +268,12 @@
             '<div class="summary-time">' + fmtTime(l.submittedAt) + '</div>' +
           '</summary>' +
           '<div class="card-body">' +
-            '<div class="card-head">' +
-              '<div class="card-sub">GitHub #' + l.number + '</div>' +
-              '<a class="card-link" href="' + l.htmlUrl + '" target="_blank" rel="noopener">在 GitHub 開啟 ↗</a>' +
-            '</div>' +
             '<div class="rows">' +
+              '<div class="k">姓名</div><div class="v">' + escapeHtml(l.name || '-') + '</div>' +
               '<div class="k">券商</div><div class="v">' + escapeHtml(l.broker || '-') + '　折數 ' + escapeHtml(l.feeDiscount || '-') + '</div>' +
               '<div class="k">聯絡</div><div class="v">' + escapeHtml(contactLine(l)) + '　(' + escapeHtml(l.convenientTime || '-') + ')</div>' +
+              '<div class="k">個資同意</div><div class="v">' + escapeHtml(l.consent || '-') + '</div>' +
+              (l.preferredContact === '手機' ? '<div class="k">簡訊同意</div><div class="v">' + escapeHtml(l.smsConsent || '-') + '</div>' : '') +
             '</div>' +
             '<div class="status-row">' + pills + '</div>' +
             (l.notes ? '<div class="notes-line">💬 ' + escapeHtml(l.notes) + '</div>' : '') +

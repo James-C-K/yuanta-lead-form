@@ -23,6 +23,7 @@ function parseIssue(issue) {
     lineId: data?.lineId || '',
     convenientTime: data?.convenientTime || '',
     smsConsent: data?.smsConsent || '',
+    consent: data?.consent || '',
     notes: data?.notes || '',
     submittedAt: data?.submittedAt || issue.created_at,
     plannedAt: data?.plannedAt || '',
