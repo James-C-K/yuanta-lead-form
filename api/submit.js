@@ -79,10 +79,16 @@ function buildPayloads(body) {
     body: { type: 'box', layout: 'vertical', spacing: 'md', paddingAll: '16px', contents: bodyContents },
   };
 
+  const closingNotice = preferredContact === 'LINE'
+    ? '請注意是否有阻擋 LINE 的訊息或是加入好友，也請留意是否有看到『Shao😊』加入您好友。或是您也可以 LINE 手機號碼搜尋：0983010246，或是致電給我，敝姓：沈，告訴我您有填表單我就會知道了，感謝您。'
+    : '請注意手機號碼：0983010246 的來電或簡訊，或是您也可以致電給我，敝姓：沈，告訴我您有填表單我就會知道了，感謝您。';
+
   return {
+    name,
     issueTitle,
     issueBody,
     flexMessage: { type: 'flex', altText: `新客戶名單：${name || '未具名'}`, contents: flexContents },
+    closingNotice,
   };
 }
 
@@ -92,7 +98,7 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { issueTitle, issueBody, flexMessage } = buildPayloads(req.body || {});
+  const { name, issueTitle, issueBody, flexMessage, closingNotice } = buildPayloads(req.body || {});
 
   const results = { github: null, line: null };
 
@@ -141,9 +147,21 @@ export default async function handler(req, res) {
   }
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.status(200).send(`<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><title>已送出</title>
-<style>body{font-family:-apple-system,sans-serif;background:#f4f6fb;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;color:#1c1f26}
-main{background:#fff;padding:40px 36px;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.08);max-width:420px;text-align:center}
-h1{font-size:20px;margin:0 0 12px}p{font-size:14px;color:#555;line-height:1.7;margin:0}</style></head>
-<body><main><h1>✅ 感謝您的填寫</h1><p>我們已經收到您的資料，將盡快與您聯繫。<br>若急需聯絡，也歡迎直接在 LINE 找 shao。</p></main></body></html>`);
+  res.status(200).send(`<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>已送出</title>
+<style>
+  :root{--accent:#2a3eb1;--ink:#161a23;--ink-2:#555d6e}
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;background:radial-gradient(1200px 500px at 50% -10%, #e7eaff 0%, #eef1f7 55%);display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;color:var(--ink)}
+  main{background:#fff;padding:36px 30px;border-radius:16px;box-shadow:0 1px 2px rgba(22,26,35,.04),0 8px 24px rgba(22,26,35,.08);max-width:440px;text-align:center}
+  .check{width:52px;height:52px;border-radius:50%;background:#e9f6ee;color:#2f9e55;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:26px}
+  h1{font-size:19px;margin:0 0 14px}
+  p{font-size:14px;color:var(--ink-2);line-height:1.7;margin:0}
+  .notice{margin-top:18px;background:#fff6e8;border:1px solid #f0dcb0;border-radius:12px;padding:14px 16px;font-size:13px;color:#6b5323;line-height:1.7;text-align:left}
+</style></head>
+<body><main>
+<div class="check">✓</div>
+<h1>感謝您的填寫${name ? '，' + name : ''}</h1>
+<p>我們已經收到您的資料，將盡快與您聯繫。</p>
+<div class="notice">${closingNotice}</div>
+</main></body></html>`);
 }
