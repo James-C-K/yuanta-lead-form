@@ -129,14 +129,12 @@
   }
   .date-field{min-width:0;}
   .date-field label{font-size:11px;color:var(--ink-3);font-weight:600;display:block;margin-bottom:4px;}
-  .date-field input{
-    -webkit-appearance:none;appearance:none;
-    width:100%;max-width:100%;min-width:0;box-sizing:border-box;
-    padding:7px 6px;border:1.5px solid var(--line);border-radius:8px;background:#fff;
-    font-size:12px;font-family:inherit;color:var(--ink);
+  .date-value{
+    font-size:12.5px;font-weight:600;color:var(--ink);
+    padding:7px 2px;min-height:17px;
   }
-  .date-field input:disabled{opacity:.5;}
-  .date-quick{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap;}
+  .date-value.empty{color:var(--ink-3);font-weight:500;}
+  .date-quick{display:flex;gap:5px;margin-top:3px;flex-wrap:wrap;}
   .date-quick button{
     padding:4px 9px;border-radius:7px;border:1.5px solid var(--line);background:#fff;
     font-size:11px;font-weight:600;color:var(--ink-2);cursor:pointer;
@@ -289,21 +287,23 @@
             '<div class="status-row">' + pills + '</div>' +
             (l.notes ? '<div class="notes-line">💬 ' + escapeHtml(l.notes) + '</div>' : '') +
             '<div class="dates-row">' +
-              '<div class="date-field">' +
+              '<div class="date-field" data-field="plannedAt" data-n="' + l.number + '">' +
                 '<label>預計處理時間</label>' +
-                '<input type="datetime-local" data-field="plannedAt" data-n="' + l.number + '" value="' + toLocalInput(l.plannedAt) + '">' +
+                '<div class="date-value' + (l.plannedAt ? '' : ' empty') + '">' + (l.plannedAt ? fmtTime(l.plannedAt) : '尚未設定') + '</div>' +
                 '<div class="date-quick">' +
-                  '<button type="button" data-n="' + l.number + '" data-field="plannedAt" data-quick="3h">3小時後</button>' +
-                  '<button type="button" data-n="' + l.number + '" data-field="plannedAt" data-quick="tomorrow9">明天9點</button>' +
-                  '<button type="button" data-n="' + l.number + '" data-field="plannedAt" data-quick="clear">清除</button>' +
+                  '<button type="button" data-quick="3h">3小時後</button>' +
+                  '<button type="button" data-quick="tomorrow9">明天9點</button>' +
+                  '<button type="button" data-quick="custom">自訂</button>' +
+                  '<button type="button" data-quick="clear">清除</button>' +
                 '</div>' +
               '</div>' +
-              '<div class="date-field">' +
+              '<div class="date-field" data-field="completedAt" data-n="' + l.number + '">' +
                 '<label>已完成時間</label>' +
-                '<input type="datetime-local" data-field="completedAt" data-n="' + l.number + '" value="' + toLocalInput(l.completedAt) + '">' +
+                '<div class="date-value' + (l.completedAt ? '' : ' empty') + '">' + (l.completedAt ? fmtTime(l.completedAt) : '尚未設定') + '</div>' +
                 '<div class="date-quick">' +
-                  '<button type="button" data-n="' + l.number + '" data-field="completedAt" data-quick="now">設為現在</button>' +
-                  '<button type="button" data-n="' + l.number + '" data-field="completedAt" data-quick="clear">清除</button>' +
+                  '<button type="button" data-quick="now">設為現在</button>' +
+                  '<button type="button" data-quick="custom">自訂</button>' +
+                  '<button type="button" data-quick="clear">清除</button>' +
                 '</div>' +
               '</div>' +
             '</div>' +
@@ -314,14 +314,11 @@
     list.querySelectorAll('.status-pill').forEach(function (btn) {
       btn.addEventListener('click', function (e) { e.preventDefault(); updateStatus(btn.dataset.n, btn.dataset.s, btn); });
     });
-    list.querySelectorAll('input[data-field]').forEach(function (inp) {
-      inp.addEventListener('change', function () { updateDateField(inp); });
-      inp.addEventListener('click', function (e) { e.stopPropagation(); });
-    });
     list.querySelectorAll('button[data-quick]').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
         e.preventDefault();
-        applyQuickDate(btn.dataset.n, btn.dataset.field, btn.dataset.quick, btn);
+        var group = btn.closest('.date-field');
+        applyQuickDate(group.dataset.n, group.dataset.field, btn.dataset.quick, btn);
       });
     });
     list.querySelectorAll('details.card').forEach(function (d) {
@@ -379,23 +376,12 @@
     });
   }
 
-  function updateDateField(inp) {
-    var number = Number(inp.dataset.n);
-    var field = inp.dataset.field;
-    var iso = fromLocalInput(inp.value);
-    inp.disabled = true;
-    saveDateField(number, field, iso)
-      .catch(function () { alert('時間更新失敗，請重試'); })
-      .finally(function () { inp.disabled = false; });
-  }
-
-  function quickDateIso(kind) {
+  function quickDateIso(kind, currentIso) {
     var now = new Date();
     if (kind === 'now') return now.toISOString();
     if (kind === 'clear') return null;
     if (kind === '3h') {
-      var h = new Date(now.getTime() + 3 * 60 * 60 * 1000);
-      return h.toISOString();
+      return new Date(now.getTime() + 3 * 60 * 60 * 1000).toISOString();
     }
     if (kind === 'tomorrow9') {
       var t = new Date(now);
@@ -403,18 +389,32 @@
       t.setHours(9, 0, 0, 0);
       return t.toISOString();
     }
+    if (kind === 'custom') {
+      var hint = toLocalInput(currentIso).replace('T', ' ') || toLocalInput(now.toISOString()).replace('T', ' ');
+      var typed = window.prompt('輸入時間（格式：YYYY-MM-DD HH:mm）', hint);
+      if (typed === null) return undefined; // cancelled
+      var iso = fromLocalInput(typed.trim().replace(' ', 'T'));
+      if (!iso) { alert('時間格式看不懂，請用 YYYY-MM-DD HH:mm'); return undefined; }
+      return iso;
+    }
     return null;
   }
 
   function applyQuickDate(number, field, kind, btn) {
     number = Number(number);
-    var iso = quickDateIso(kind);
     var group = btn.closest('.date-field');
+    var lead = leads.find(function (l) { return l.number === number; });
+    var iso = quickDateIso(kind, lead ? lead[field] : null);
+    if (iso === undefined) return; // cancelled or invalid custom input
+
     group.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
     saveDateField(number, field, iso)
       .then(function () {
-        var inp = group.querySelector('input[data-field="' + field + '"]');
-        if (inp) inp.value = toLocalInput(iso);
+        var valueEl = group.querySelector('.date-value');
+        if (valueEl) {
+          valueEl.textContent = iso ? fmtTime(iso) : '尚未設定';
+          valueEl.classList.toggle('empty', !iso);
+        }
       })
       .catch(function () { alert('時間更新失敗，請重試'); })
       .finally(function () {
