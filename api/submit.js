@@ -107,16 +107,6 @@ export default async function handler(req, res) {
 
   const results = { github: null, line: null };
 
-  if (req.query && req.query.debug === '1') {
-    const t = process.env.GITHUB_TOKEN || '';
-    results._tokenDiag = {
-      length: t.length,
-      head: t.slice(0, 10),
-      tail: t.slice(-4),
-      repoEnv: process.env.GITHUB_DATA_REPO || null,
-    };
-  }
-
   try {
     const ghRes = await fetch(
       `https://api.github.com/repos/${process.env.GITHUB_DATA_REPO}/issues`,
